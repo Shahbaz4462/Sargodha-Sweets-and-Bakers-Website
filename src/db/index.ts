@@ -14,17 +14,25 @@ if (!databaseUrl && process.env.NODE_ENV === "production") {
 
 const globalForDb = globalThis as typeof globalThis & {
   __sargodhaPostgresPool?: Pool;
+  __sargodhaPostgresDb?: NodePgDatabase<typeof schema>;
   __sargodhaLocalPglite?: PGlite;
   __sargodhaLocalDbReady?: Promise<void>;
 };
 
-export const pool = databaseUrl
-  ? globalForDb.__sargodhaPostgresPool ?? new Pool({ connectionString: databaseUrl })
-  : undefined;
-
-if (pool && process.env.NODE_ENV !== "production") {
-  globalForDb.__sargodhaPostgresPool = pool;
+if (databaseUrl && !globalForDb.__sargodhaPostgresPool) {
+  const postgresPool = new Pool({
+    connectionString: databaseUrl,
+    max: 1,
+    idleTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 10_000,
+  });
+  postgresPool.on("error", (error) => {
+    console.error("Unexpected idle PostgreSQL client error", error);
+  });
+  globalForDb.__sargodhaPostgresPool = postgresPool;
 }
+
+export const pool = databaseUrl ? globalForDb.__sargodhaPostgresPool : undefined;
 
 const localClient = databaseUrl
   ? undefined
@@ -35,8 +43,15 @@ if (localClient && process.env.NODE_ENV !== "production") {
 }
 
 const localDb = localClient ? drizzlePglite(localClient, { schema }) : undefined;
+const postgresDb = pool
+  ? globalForDb.__sargodhaPostgresDb ?? drizzlePostgres(pool, { schema })
+  : undefined;
 
-export const db = (pool ? drizzlePostgres(pool, { schema }) : localDb) as NodePgDatabase<typeof schema>;
+if (postgresDb && !globalForDb.__sargodhaPostgresDb) {
+  globalForDb.__sargodhaPostgresDb = postgresDb;
+}
+
+export const db = (postgresDb ?? localDb) as NodePgDatabase<typeof schema>;
 
 export async function initializeDatabase() {
   if (!localClient || !localDb) return;

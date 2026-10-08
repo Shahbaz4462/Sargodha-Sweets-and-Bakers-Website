@@ -4,6 +4,22 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
 export async function seedDatabase() {
+  const globalForSeed = globalThis as typeof globalThis & {
+    __sargodhaSeedPromise?: Promise<void>;
+  };
+  const seedPromise = globalForSeed.__sargodhaSeedPromise ??= seedDatabaseOnce();
+
+  try {
+    await seedPromise;
+  } catch (error) {
+    if (globalForSeed.__sargodhaSeedPromise === seedPromise) {
+      delete globalForSeed.__sargodhaSeedPromise;
+    }
+    throw error;
+  }
+}
+
+async function seedDatabaseOnce() {
   await initializeDatabase();
 
   const adminEmail = process.env.ADMIN_EMAIL || (process.env.NODE_ENV === "production" ? "" : "admin@sargodhasweets.com");
@@ -487,5 +503,6 @@ export async function seedDatabase() {
 
   } catch (err) {
     console.error("Error seeding database:", err);
+    throw err;
   }
 }
