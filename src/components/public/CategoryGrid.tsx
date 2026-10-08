@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface Category {
   id: number;
@@ -53,7 +54,7 @@ export function CategoryGrid({ categories, onSelectCategory }: CategoryGridProps
               {/* Image background */}
               <div className="relative w-full h-full">
                 <Image
-                  src={cat.image || "/images/hero-fallback.jpg"}
+                  src={resolveMediaUrl(cat.image, "/images/hero-fallback.jpg")}
                   alt={cat.name}
                   fill
                   className="object-cover group-hover:scale-110 transition-transform duration-500"

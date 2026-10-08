@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { Award, UserCheck, ShieldCheck } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface TeamMember {
   id: number;
@@ -49,7 +50,7 @@ export function TeamSection({ team }: TeamSectionProps) {
               {/* Photo Box */}
               <div className="relative w-full h-72 bg-black/5 dark:bg-white/5 overflow-hidden">
                 <Image
-                  src={member.image || "/images/hero-fallback.jpg"}
+                  src={resolveMediaUrl(member.image, "/images/hero-fallback.jpg")}
                   alt={`Initials monogram for ${member.name}`}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"

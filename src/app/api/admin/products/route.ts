@@ -3,6 +3,8 @@ import { checkAdminOrThrow, logAdminAction } from "@/lib/auth";
 import { db } from "@/db";
 import { products } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { isAllowedMediaUrl } from "@/lib/media";
 
 export async function GET() {
   try {
@@ -44,6 +46,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Product name and category are required" }, { status: 400 });
     }
 
+    let extraImageUrls: unknown[] = [];
+    try {
+      extraImageUrls = typeof additionalImages === "string"
+        ? JSON.parse(additionalImages)
+        : Array.isArray(additionalImages) ? additionalImages : [];
+    } catch {
+      return NextResponse.json({ error: "Additional product images must be a valid image list." }, { status: 400 });
+    }
+    if (!isAllowedMediaUrl(image) || extraImageUrls.some((url) => !isAllowedMediaUrl(url))) {
+      return NextResponse.json({ error: "Product media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
+    }
+
     const prodSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
     const formattedPrice = priceOnRequest ? null : (price !== "" && price !== null ? Number(price) : null);
     
@@ -82,6 +96,8 @@ export async function POST(req: Request) {
         .returning();
 
       await logAdminAction(admin.email, "UPDATE_PRODUCT", `Updated product: ${name}`);
+      revalidatePath("/");
+      revalidatePath("/api/public/data");
       return NextResponse.json({ success: true, product: updated });
     } else {
       // Create
@@ -93,6 +109,8 @@ export async function POST(req: Request) {
         .returning();
 
       await logAdminAction(admin.email, "CREATE_PRODUCT", `Created product: ${name}`);
+      revalidatePath("/");
+      revalidatePath("/api/public/data");
       return NextResponse.json({ success: true, product: created });
     }
   } catch (error: any) {
@@ -116,6 +134,8 @@ export async function DELETE(req: Request) {
       .returning();
 
     await logAdminAction(admin.email, "DELETE_PRODUCT", `Deleted product ID: ${id} (${deleted?.name || ""})`);
+    revalidatePath("/");
+    revalidatePath("/api/public/data");
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to delete product" }, { status: 500 });

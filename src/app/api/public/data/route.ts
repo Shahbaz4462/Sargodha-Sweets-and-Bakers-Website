@@ -3,6 +3,10 @@ import { db } from "@/db";
 import { siteSettings, categories, products, teamMembers, timelines, gallery } from "@/db/schema";
 import { seedDatabase } from "@/db/seed";
 import { eq, asc } from "drizzle-orm";
+import { resolveMediaUrl } from "@/lib/media";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET() {
   try {
@@ -13,7 +17,16 @@ export async function GET() {
       db.select().from(siteSettings).limit(1),
     ]);
 
-    const settings = settingsList[0] || null;
+    const storedSettings = settingsList[0] || null;
+    const settings = storedSettings
+      ? {
+          ...storedSettings,
+          logoUrl: resolveMediaUrl(storedSettings.logoUrl),
+          faviconUrl: resolveMediaUrl(storedSettings.faviconUrl),
+          heroVideoUrl: resolveMediaUrl(storedSettings.heroVideoUrl),
+          heroFallbackImage: resolveMediaUrl(storedSettings.heroFallbackImage),
+        }
+      : null;
 
     const [categoriesList, productsList, teamList, timelineList, galleryList] = await Promise.all([
       db.select().from(categories).orderBy(asc(categories.sortOrder), asc(categories.id)),
@@ -24,10 +37,18 @@ export async function GET() {
     ]);
 
     // Filter active items for public consumption
-    const activeCategories = categoriesList.filter(c => c.status === "active");
-    const activeProducts = productsList.filter(p => p.status !== "hidden");
-    const activeTeam = teamList.filter(t => t.status === "active");
-    const activeGallery = galleryList.filter(g => g.status === "active");
+    const activeCategories = categoriesList
+      .filter((category) => category.status === "active")
+      .map((category) => ({ ...category, image: resolveMediaUrl(category.image) }));
+    const activeProducts = productsList
+      .filter((product) => product.status !== "hidden")
+      .map((product) => ({ ...product, image: resolveMediaUrl(product.image) }));
+    const activeTeam = teamList
+      .filter((member) => member.status === "active")
+      .map((member) => ({ ...member, image: resolveMediaUrl(member.image) }));
+    const activeGallery = galleryList
+      .filter((item) => item.status === "active")
+      .map((item) => ({ ...item, image: resolveMediaUrl(item.image) }));
 
     return NextResponse.json({
       settings,
@@ -36,7 +57,7 @@ export async function GET() {
       team: activeTeam,
       timeline: timelineList,
       gallery: activeGallery,
-    });
+    }, { headers: { "Cache-Control": "no-store, max-age=0" } });
   } catch (error) {
     console.error("Public data error:", error);
     return NextResponse.json({ error: "Failed to fetch public data" }, { status: 500 });

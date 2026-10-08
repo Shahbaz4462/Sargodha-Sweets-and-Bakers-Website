@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { Sparkles, Calendar, GraduationCap, Users } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface TimelineItem {
   id: number;
@@ -72,7 +73,7 @@ export function AboutAndTimeline({ settings, timelines }: AboutAndTimelineProps)
             <div className="lg:col-span-4 flex justify-center">
               <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full border-8 border-gold/30 overflow-hidden shadow-2xl bg-burgundy flex items-center justify-center p-2">
                 <Image
-                  src="/images/brand-seal.png"
+                  src={resolveMediaUrl(settings?.logoUrl, "/images/brand-seal.png")}
                   alt="Sargodha Sweets Seal"
                   width={280}
                   height={280}

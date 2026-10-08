@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, ArrowRight, AlertCircle } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/media";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -11,6 +12,16 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [logoUrl, setLogoUrl] = useState("/images/brand-seal.png");
+
+  useEffect(() => {
+    fetch("/api/public/site-settings", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((settings) => {
+        if (settings?.logoUrl) setLogoUrl(resolveMediaUrl(settings.logoUrl, "/images/brand-seal.png"));
+      })
+      .catch(() => setLogoUrl("/images/brand-seal.png"));
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +63,7 @@ export default function AdminLoginPage() {
           <div className="text-center mb-8">
             <div className="relative w-20 h-20 mx-auto mb-4 rounded-full border-2 border-[#D4AF37] bg-[#6B1D2F] p-1 shadow-lg">
               <Image
-                src="/images/brand-seal.png"
+                src={logoUrl}
                 alt="Sargodha Sweets Admin"
                 fill
                 className="object-cover rounded-full"

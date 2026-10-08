@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { resolveMediaUrl } from "@/lib/media";
 import {
   LayoutDashboard,
   Settings,
@@ -23,6 +24,7 @@ import {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
+  const [logoUrl, setLogoUrl] = useState("/images/brand-seal.png");
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -41,6 +43,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           window.location.href = "/admin/login";
         } else {
           setUser(data.user);
+          try {
+            const settingsResponse = await fetch("/api/admin/site-settings", { cache: "no-store" });
+            const settingsData = await settingsResponse.json();
+            if (settingsResponse.ok) {
+              setLogoUrl(resolveMediaUrl(settingsData.settings?.logoUrl, "/images/brand-seal.png"));
+            }
+          } catch {
+            setLogoUrl("/images/brand-seal.png");
+          }
         }
       } catch (err) {
         window.location.href = "/admin/login";
@@ -94,7 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Header Branding */}
           <div className="p-6 border-b border-white/10 flex items-center gap-3">
             <div className="relative w-10 h-10 rounded-full border border-[#D4AF37] overflow-hidden bg-[#6B1D2F]">
-              <Image src="/images/brand-seal.png" alt="Sargodha Sweets Logo" fill className="object-cover" />
+              <Image src={logoUrl} alt="Sargodha Sweets Logo" fill className="object-cover" />
             </div>
             <div>
               <span className="font-serif text-sm font-bold block text-white">Sargodha Sweets</span>
@@ -158,7 +169,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="md:hidden bg-[#18151B] border-b border-white/10 p-4 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <div className="relative w-8 h-8 rounded-full border border-[#D4AF37] overflow-hidden bg-[#6B1D2F]">
-            <Image src="/images/brand-seal.png" alt="Logo" fill className="object-cover" />
+            <Image src={logoUrl} alt="Logo" fill className="object-cover" />
           </div>
           <span className="font-serif text-sm font-bold">Admin Dashboard</span>
         </div>

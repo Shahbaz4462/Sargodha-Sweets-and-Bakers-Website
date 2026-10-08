@@ -3,6 +3,8 @@ import { checkAdminOrThrow, logAdminAction } from "@/lib/auth";
 import { db } from "@/db";
 import { gallery } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { isAllowedMediaUrl } from "@/lib/media";
 
 export async function GET() {
   try {
@@ -23,6 +25,9 @@ export async function POST(req: Request) {
     if (!image) {
       return NextResponse.json({ error: "Image URL is required" }, { status: 400 });
     }
+    if (!isAllowedMediaUrl(image)) {
+      return NextResponse.json({ error: "Gallery media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
+    }
 
     const payload = {
       title: title || "",
@@ -40,6 +45,8 @@ export async function POST(req: Request) {
         .returning();
 
       await logAdminAction(admin.email, "UPDATE_GALLERY", `Updated gallery item ID: ${id}`);
+      revalidatePath("/");
+      revalidatePath("/api/public/data");
       return NextResponse.json({ success: true, item: updated });
     } else {
       const [created] = await db.insert(gallery)
@@ -47,6 +54,8 @@ export async function POST(req: Request) {
         .returning();
 
       await logAdminAction(admin.email, "CREATE_GALLERY", `Added gallery item: ${title || "Untitled"}`);
+      revalidatePath("/");
+      revalidatePath("/api/public/data");
       return NextResponse.json({ success: true, item: created });
     }
   } catch (error: any) {
@@ -66,6 +75,8 @@ export async function DELETE(req: Request) {
 
     await db.delete(gallery).where(eq(gallery.id, Number(id)));
     await logAdminAction(admin.email, "DELETE_GALLERY", `Deleted gallery item ID: ${id}`);
+    revalidatePath("/");
+    revalidatePath("/api/public/data");
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to delete gallery item" }, { status: 500 });

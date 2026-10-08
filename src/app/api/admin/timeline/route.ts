@@ -3,6 +3,8 @@ import { checkAdminOrThrow, logAdminAction } from "@/lib/auth";
 import { db } from "@/db";
 import { timelines } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { isAllowedMediaUrl } from "@/lib/media";
 
 export async function GET() {
   try {
@@ -23,6 +25,9 @@ export async function POST(req: Request) {
     if (!year || !title) {
       return NextResponse.json({ error: "Year and title are required" }, { status: 400 });
     }
+    if (!isAllowedMediaUrl(image)) {
+      return NextResponse.json({ error: "Timeline media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
+    }
 
     const payload = {
       year,
@@ -39,6 +44,7 @@ export async function POST(req: Request) {
         .returning();
 
       await logAdminAction(admin.email, "UPDATE_TIMELINE", `Updated timeline event: ${year} - ${title}`);
+      revalidatePath("/");
       return NextResponse.json({ success: true, timeline: updated });
     } else {
       const [created] = await db.insert(timelines)
@@ -46,6 +52,7 @@ export async function POST(req: Request) {
         .returning();
 
       await logAdminAction(admin.email, "CREATE_TIMELINE", `Added timeline event: ${year} - ${title}`);
+      revalidatePath("/");
       return NextResponse.json({ success: true, timeline: created });
     }
   } catch (error: any) {
@@ -65,6 +72,7 @@ export async function DELETE(req: Request) {
 
     await db.delete(timelines).where(eq(timelines.id, Number(id)));
     await logAdminAction(admin.email, "DELETE_TIMELINE", `Deleted timeline event ID: ${id}`);
+    revalidatePath("/");
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to delete timeline event" }, { status: 500 });

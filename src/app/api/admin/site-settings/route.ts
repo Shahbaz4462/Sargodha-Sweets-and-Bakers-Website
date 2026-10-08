@@ -3,6 +3,8 @@ import { checkAdminOrThrow, logAdminAction } from "@/lib/auth";
 import { db } from "@/db";
 import { siteSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { isAllowedMediaUrl } from "@/lib/media";
 
 export async function GET() {
   try {
@@ -22,6 +24,10 @@ export async function POST(req: Request) {
     const admin = await checkAdminOrThrow();
     const body = await req.json();
 
+    if ([body.logoUrl, body.faviconUrl, body.heroVideoUrl, body.heroFallbackImage].some((url) => !isAllowedMediaUrl(url))) {
+      return NextResponse.json({ error: "Media must be stored in this project's Supabase Storage bucket or the local images directory." }, { status: 400 });
+    }
+
     const existing = await db.select().from(siteSettings).limit(1);
 
     if (existing.length === 0) {
@@ -39,6 +45,8 @@ export async function POST(req: Request) {
     }
 
     await logAdminAction(admin.email, "UPDATE_SETTINGS", "Updated website branding, hero, or contact details");
+    revalidatePath("/");
+    revalidatePath("/api/public/data");
 
     const updated = await db.select().from(siteSettings).limit(1);
     return NextResponse.json({ success: true, settings: updated[0] });

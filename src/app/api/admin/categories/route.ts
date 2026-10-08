@@ -3,6 +3,8 @@ import { checkAdminOrThrow, logAdminAction } from "@/lib/auth";
 import { db } from "@/db";
 import { categories } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { isAllowedMediaUrl } from "@/lib/media";
 
 export async function GET() {
   try {
@@ -26,6 +28,9 @@ export async function POST(req: Request) {
     if (!name) {
       return NextResponse.json({ error: "Category name is required" }, { status: 400 });
     }
+    if (!isAllowedMediaUrl(image)) {
+      return NextResponse.json({ error: "Category media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
+    }
 
     const categorySlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
@@ -45,6 +50,8 @@ export async function POST(req: Request) {
         .returning();
 
       await logAdminAction(admin.email, "UPDATE_CATEGORY", `Updated category: ${name}`);
+      revalidatePath("/");
+      revalidatePath("/api/public/data");
       return NextResponse.json({ success: true, category: updated });
     } else {
       // Create
@@ -60,6 +67,8 @@ export async function POST(req: Request) {
         .returning();
 
       await logAdminAction(admin.email, "CREATE_CATEGORY", `Created category: ${name}`);
+      revalidatePath("/");
+      revalidatePath("/api/public/data");
       return NextResponse.json({ success: true, category: created });
     }
   } catch (error: any) {
@@ -85,6 +94,8 @@ export async function DELETE(req: Request) {
       .returning();
 
     await logAdminAction(admin.email, "DELETE_CATEGORY", `Deleted category ID: ${id} (${deleted?.name || ""})`);
+    revalidatePath("/");
+    revalidatePath("/api/public/data");
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json(

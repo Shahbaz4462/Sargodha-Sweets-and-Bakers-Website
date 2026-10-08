@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Sparkles, ArrowRight, Award, ShieldCheck } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface HeroProps {
   settings?: any;
@@ -16,9 +17,10 @@ export function Hero({ settings }: HeroProps) {
   const heroDescription =
     settings?.heroDescription ||
     "Discover the authentic Pakistani sweets, artisanal cakes, and bakery creations that have been part of our family journey for generations.";
-  const videoUrl = settings?.heroVideoUrl || "https://videos.pexels.com/video-files/8478025/8478025-hd_1920_1080_24fps.mp4";
-  const fallbackImage = settings?.heroFallbackImage || "/images/cat-sweets.jpg";
-  const videoEnabled = settings?.heroVideoEnabled ?? false;
+  const videoUrl = resolveMediaUrl(settings?.heroVideoUrl);
+  const fallbackImage = resolveMediaUrl(settings?.heroFallbackImage, "/images/cat-sweets.jpg");
+  const videoEnabled = Boolean(settings?.heroVideoEnabled && videoUrl);
+  const videoType = /\.webm(?:$|\?)/i.test(videoUrl) ? "video/webm" : "video/mp4";
 
   return (
     <section id="hero" className="relative w-full min-h-[92vh] flex items-center justify-center overflow-hidden pt-20">
@@ -33,7 +35,7 @@ export function Hero({ settings }: HeroProps) {
             onError={() => setVideoError(true)}
             className="w-full h-full object-cover scale-105 transform duration-1000"
           >
-            <source src={videoUrl} type="video/mp4" />
+            <source src={videoUrl} type={videoType} />
           </video>
         ) : (
           <Image

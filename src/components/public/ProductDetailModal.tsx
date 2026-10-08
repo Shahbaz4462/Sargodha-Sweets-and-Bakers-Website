@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { X, MessageSquare, Phone, CheckCircle, AlertCircle, Share2 } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface Product {
   id: number;
@@ -46,7 +47,9 @@ export function ProductDetailModal({ product, onClose, whatsappPhone = "+9230012
     extraImages = [];
   }
 
-  const allImages = Array.from(new Set([product.image, ...extraImages].filter(Boolean)));
+  const allImages = Array.from(new Set([product.image, ...extraImages]
+    .map((image) => resolveMediaUrl(image))
+    .filter(Boolean)));
   const currentImage = selectedImage || allImages[0] || "/images/hero-fallback.jpg";
 
   const handleInquirySubmit = async (e: React.FormEvent) => {

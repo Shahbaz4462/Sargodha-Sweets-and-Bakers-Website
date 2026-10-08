@@ -3,6 +3,8 @@ import { checkAdminOrThrow, logAdminAction } from "@/lib/auth";
 import { db } from "@/db";
 import { teamMembers } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { isAllowedMediaUrl } from "@/lib/media";
 
 export async function GET() {
   try {
@@ -26,6 +28,9 @@ export async function POST(req: Request) {
     if (!name || !role) {
       return NextResponse.json({ error: "Name and role are required" }, { status: 400 });
     }
+    if (!isAllowedMediaUrl(image)) {
+      return NextResponse.json({ error: "Team media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
+    }
 
     const payload = {
       name,
@@ -44,6 +49,8 @@ export async function POST(req: Request) {
         .returning();
 
       await logAdminAction(admin.email, "UPDATE_TEAM", `Updated team member: ${name}`);
+      revalidatePath("/");
+      revalidatePath("/api/public/data");
       return NextResponse.json({ success: true, teamMember: updated });
     } else {
       const [created] = await db.insert(teamMembers)
@@ -51,6 +58,8 @@ export async function POST(req: Request) {
         .returning();
 
       await logAdminAction(admin.email, "CREATE_TEAM", `Added team member: ${name}`);
+      revalidatePath("/");
+      revalidatePath("/api/public/data");
       return NextResponse.json({ success: true, teamMember: created });
     }
   } catch (error: any) {
@@ -73,6 +82,8 @@ export async function DELETE(req: Request) {
       .returning();
 
     await logAdminAction(admin.email, "DELETE_TEAM", `Removed team member ID: ${id} (${deleted?.name || ""})`);
+    revalidatePath("/");
+    revalidatePath("/api/public/data");
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to delete team member" }, { status: 500 });

@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Video, Upload, Save, CheckCircle2, AlertCircle, Play, Eye } from "lucide-react";
+import { uploadAdminMedia } from "@/lib/media-upload";
+import { resolveMediaUrl } from "@/lib/media";
 
 export default function HeroAdminPage() {
   const [loading, setLoading] = useState(true);
@@ -15,9 +17,9 @@ export default function HeroAdminPage() {
     heroSubtitle: "Since 1990",
     heroTitle: "A Tradition of Taste, Quality & Sweetness",
     heroDescription: "Discover the authentic Pakistani sweets, artisanal cakes, and bakery creations that have been part of our family journey for generations.",
-    heroVideoUrl: "https://videos.pexels.com/video-files/8478025/8478025-hd_1920_1080_24fps.mp4",
+    heroVideoUrl: "",
     heroFallbackImage: "/images/cat-sweets.jpg",
-    heroVideoEnabled: true,
+    heroVideoEnabled: false,
   });
 
   useEffect(() => {
@@ -29,14 +31,15 @@ export default function HeroAdminPage() {
       const res = await fetch("/api/admin/site-settings");
       const data = await res.json();
       if (res.ok && data.settings) {
+        const heroVideoUrl = resolveMediaUrl(data.settings.heroVideoUrl);
         setForm((prev) => ({
           ...prev,
           heroSubtitle: data.settings.heroSubtitle || prev.heroSubtitle,
           heroTitle: data.settings.heroTitle || prev.heroTitle,
           heroDescription: data.settings.heroDescription || prev.heroDescription,
-          heroVideoUrl: data.settings.heroVideoUrl || prev.heroVideoUrl,
-          heroFallbackImage: data.settings.heroFallbackImage || prev.heroFallbackImage,
-          heroVideoEnabled: data.settings.heroVideoEnabled ?? prev.heroVideoEnabled,
+          heroVideoUrl,
+          heroFallbackImage: resolveMediaUrl(data.settings.heroFallbackImage, "/images/cat-sweets.jpg"),
+          heroVideoEnabled: Boolean(data.settings.heroVideoEnabled && heroVideoUrl),
         }));
       }
     } catch (err) {
@@ -53,24 +56,16 @@ export default function HeroAdminPage() {
     setUploading(true);
     setError("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Upload failed");
-      } else {
-        setForm((prev) => ({ ...prev, [fieldName]: data.url }));
-        setMessage("File uploaded successfully");
-      }
-    } catch (err) {
-      setError("File upload failed");
+      const url = await uploadAdminMedia(file, "hero");
+      setForm((prev) => ({
+        ...prev,
+        [fieldName]: url,
+        ...(fieldName === "heroVideoUrl" ? { heroVideoEnabled: true } : {}),
+      }));
+      setMessage("Upload complete. Save changes to publish this media.");
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "File upload failed");
     } finally {
       setUploading(false);
     }
@@ -199,7 +194,7 @@ export default function HeroAdminPage() {
                 <span>Upload Fallback Image File</span>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
                   onChange={(e) => handleFileUpload(e, "heroFallbackImage")}
                   className="hidden"
                 />
@@ -211,13 +206,13 @@ export default function HeroAdminPage() {
           <div className="pt-4 border-t border-white/10">
             <span className="text-xs font-bold text-gray-300 block mb-2">Live Hero Background Preview</span>
             <div className="relative w-full h-56 rounded-2xl overflow-hidden border border-white/10 bg-black">
-              {form.heroVideoEnabled && form.heroVideoUrl ? (
+              {form.heroVideoEnabled && resolveMediaUrl(form.heroVideoUrl) ? (
                 <video autoPlay loop muted playsInline className="w-full h-full object-cover">
-                  <source src={form.heroVideoUrl} type="video/mp4" />
+                  <source src={resolveMediaUrl(form.heroVideoUrl)} type={/\.webm(?:$|\?)/i.test(form.heroVideoUrl) ? "video/webm" : "video/mp4"} />
                 </video>
               ) : (
                 <Image
-                  src={form.heroFallbackImage || "/images/cat-sweets.jpg"}
+                  src={resolveMediaUrl(form.heroFallbackImage, "/images/cat-sweets.jpg")}
                   alt="Hero Preview"
                   fill
                   className="object-cover"

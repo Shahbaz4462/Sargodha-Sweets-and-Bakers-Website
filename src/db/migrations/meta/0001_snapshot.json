@@ -1,6 +1,6 @@
 {
-  "id": "f931b05f-7340-4004-a867-2bc9ffd350fc",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "b9c33827-8dbc-485c-94eb-0fbe7439594e",
+  "prevId": "f931b05f-7340-4004-a867-2bc9ffd350fc",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -439,14 +439,14 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'/images/logo.png'"
+          "default": "'/images/brand-seal.png'"
         },
         "favicon_url": {
           "name": "favicon_url",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'/images/logo.png'"
+          "default": "'/images/brand-seal.png'"
         },
         "primary_color": {
           "name": "primary_color",
@@ -495,14 +495,14 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'/images/hero-fallback.jpg'"
+          "default": "'/images/cat-sweets.jpg'"
         },
         "hero_video_enabled": {
           "name": "hero_video_enabled",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
-          "default": true
+          "default": false
         },
         "intro_heading": {
           "name": "intro_heading",

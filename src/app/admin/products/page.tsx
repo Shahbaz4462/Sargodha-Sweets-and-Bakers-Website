@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { uploadAdminMedia } from "@/lib/media-upload";
+import { resolveMediaUrl } from "@/lib/media";
 import {
   ShoppingBag,
   Plus,
@@ -88,7 +90,7 @@ export default function ProductsAdminPage() {
         priceDisplay: prod.priceDisplay || "",
         priceOnRequest: prod.priceOnRequest || false,
         unit: prod.unit || "Per kg",
-        image: prod.image || "",
+        image: resolveMediaUrl(prod.image),
         additionalImages: prod.additionalImages || "[]",
         ingredients: prod.ingredients || "",
         featured: prod.featured || false,
@@ -107,7 +109,7 @@ export default function ProductsAdminPage() {
         priceDisplay: "",
         priceOnRequest: false,
         unit: "Per kg",
-        image: "/images/hero-fallback.jpg",
+        image: "",
         additionalImages: "[]",
         ingredients: "",
         featured: false,
@@ -123,17 +125,9 @@ export default function ProductsAdminPage() {
     if (!file) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (res.ok && data.url) {
+      const url = await uploadAdminMedia(file, "products");
+      {
         if (isAdditional) {
           let list: string[] = [];
           try {
@@ -141,14 +135,14 @@ export default function ProductsAdminPage() {
           } catch {
             list = [];
           }
-          list.push(data.url);
-          setForm({ ...form, additionalImages: JSON.stringify(list) });
+          list.push(url);
+          setForm((prev) => ({ ...prev, additionalImages: JSON.stringify(list) }));
         } else {
-          setForm({ ...form, image: data.url });
+          setForm((prev) => ({ ...prev, image: url }));
         }
       }
-    } catch (err) {
-      console.error(err);
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Image upload failed");
     } finally {
       setUploading(false);
     }
@@ -292,7 +286,7 @@ export default function ProductsAdminPage() {
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
                         <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-white/10 bg-black shrink-0">
-                          <Image src={p.image || "/images/hero-fallback.jpg"} alt={p.name} fill className="object-cover" />
+                          <Image src={resolveMediaUrl(p.image, "/images/hero-fallback.jpg")} alt={p.name} fill className="object-cover" />
                         </div>
                         <div>
                           <span className="font-bold text-white block text-sm">{p.name}</span>
@@ -499,12 +493,17 @@ export default function ProductsAdminPage() {
                     <span>Upload</span>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
                       onChange={(e) => handleImageUpload(e, false)}
                       className="hidden"
                     />
                   </label>
                 </div>
+                {form.image && (
+                  <div className="relative mt-3 h-36 w-36 overflow-hidden rounded-lg border border-white/10 bg-black/5">
+                    <Image src={resolveMediaUrl(form.image, "/images/hero-fallback.jpg")} alt="Product media preview" fill className="object-cover" />
+                  </div>
+                )}
               </div>
 
               {/* Ingredients & Settings */}

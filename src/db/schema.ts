@@ -20,7 +20,7 @@ export const siteSettings = pgTable("site_settings", {
   heroTitle: text("hero_title").notNull().default("A Tradition of Taste, Quality & Sweetness"),
   heroSubtitle: text("hero_subtitle").notNull().default("Since 1990"),
   heroDescription: text("hero_description").notNull().default("Discover the Pakistani sweets, artisanal cakes, and bakery creations that have been part of our family journey for generations."),
-  heroVideoUrl: text("hero_video_url").notNull().default("https://videos.pexels.com/video-files/8478025/8478025-hd_1920_1080_24fps.mp4"),
+  heroVideoUrl: text("hero_video_url").notNull().default(""),
   heroFallbackImage: text("hero_fallback_image").notNull().default("/images/cat-sweets.jpg"),
   heroVideoEnabled: boolean("hero_video_enabled").notNull().default(false),
   introHeading: text("intro_heading").notNull().default("A Legacy of Taste Since 1990"),

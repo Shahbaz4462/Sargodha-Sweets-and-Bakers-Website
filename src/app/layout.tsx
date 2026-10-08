@@ -25,9 +25,9 @@ export const metadata: Metadata = {
     images: [{ url: "/images/cat-sweets.jpg" }],
   },
   icons: {
-    icon: "/images/brand-seal.png",
-    shortcut: "/images/brand-seal.png",
-    apple: "/images/brand-seal.png",
+    icon: "/api/public/site-icon",
+    shortcut: "/api/public/site-icon",
+    apple: "/api/public/site-icon",
   },
 };
 

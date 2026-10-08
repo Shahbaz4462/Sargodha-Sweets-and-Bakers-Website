@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Image as ImageIcon, Plus, Edit, Trash2, Upload, X, AlertCircle } from "lucide-react";
+import { uploadAdminMedia } from "@/lib/media-upload";
+import { resolveMediaUrl } from "@/lib/media";
 
 export default function GalleryAdminPage() {
   const [gallery, setGallery] = useState<any[]>([]);
@@ -48,7 +50,7 @@ export default function GalleryAdminPage() {
         id: item.id,
         title: item.title || "",
         description: item.description || "",
-        image: item.image || "",
+        image: resolveMediaUrl(item.image),
         category: item.category || "Sweets",
         status: item.status || "active",
         sortOrder: item.sortOrder || 0,
@@ -58,7 +60,7 @@ export default function GalleryAdminPage() {
         id: null,
         title: "",
         description: "",
-        image: "/images/hero-fallback.jpg",
+        image: "",
         category: "Sweets",
         status: "active",
         sortOrder: gallery.length + 1,
@@ -72,17 +74,11 @@ export default function GalleryAdminPage() {
     if (!file) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      if (res.ok && data.url) {
-        setForm({ ...form, image: data.url });
-      }
-    } catch (err) {
-      console.error(err);
+      const url = await uploadAdminMedia(file, "gallery");
+      setForm((prev) => ({ ...prev, image: url }));
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Image upload failed");
     } finally {
       setUploading(false);
     }
@@ -160,7 +156,7 @@ export default function GalleryAdminPage() {
           >
             <div>
               <div className="relative w-full h-48 rounded-xl overflow-hidden border border-white/10 bg-black mb-3">
-                <Image src={g.image} alt={g.title || "Gallery"} fill className="object-cover" />
+                <Image src={resolveMediaUrl(g.image, "/images/hero-fallback.jpg")} alt={g.title || "Gallery"} fill className="object-cover" />
                 <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-[#6B1D2F] text-white text-[10px] font-bold">
                   {g.category}
                 </span>
@@ -225,9 +221,14 @@ export default function GalleryAdminPage() {
                   <label className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs text-gray-200 cursor-pointer font-semibold shrink-0 flex items-center gap-1.5">
                     <Upload className="w-3.5 h-3.5 text-[#D4AF37]" />
                     <span>Upload</span>
-                    <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" onChange={handleFileUpload} className="hidden" />
                   </label>
                 </div>
+                {form.image && (
+                  <div className="relative mt-3 h-36 overflow-hidden rounded-lg border border-white/10 bg-black/5">
+                    <Image src={resolveMediaUrl(form.image, "/images/hero-fallback.jpg")} alt="Gallery media preview" fill className="object-cover" />
+                  </div>
+                )}
               </div>
 
               <div>

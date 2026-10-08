@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { Search, Sparkles, AlertCircle, Info } from "lucide-react";
 import { ProductDetailModal } from "./ProductDetailModal";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface Category {
   id: number;
@@ -189,7 +190,7 @@ export function ProductsCatalog({
                     {/* Image Container */}
                     <div className="relative w-full h-48 bg-black/5 dark:bg-white/5 overflow-hidden">
                       <Image
-                        src={product.image || "/images/hero-fallback.jpg"}
+                        src={resolveMediaUrl(product.image, "/images/hero-fallback.jpg")}
                         alt={product.name}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"

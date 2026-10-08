@@ -73,7 +73,7 @@ CREATE TABLE "site_settings" (
 	"hero_title" text DEFAULT 'A Tradition of Taste, Quality & Sweetness' NOT NULL,
 	"hero_subtitle" text DEFAULT 'Since 1990' NOT NULL,
 	"hero_description" text DEFAULT 'Discover the Pakistani sweets, artisanal cakes, and bakery creations that have been part of our family journey for generations.' NOT NULL,
-	"hero_video_url" text DEFAULT 'https://videos.pexels.com/video-files/8478025/8478025-hd_1920_1080_24fps.mp4' NOT NULL,
+	"hero_video_url" text DEFAULT '' NOT NULL,
 	"hero_fallback_image" text DEFAULT '/images/hero-fallback.jpg' NOT NULL,
 	"hero_video_enabled" boolean DEFAULT true NOT NULL,
 	"intro_heading" text DEFAULT 'A Legacy of Taste Since 1990' NOT NULL,

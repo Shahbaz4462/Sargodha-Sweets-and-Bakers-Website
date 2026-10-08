@@ -41,15 +41,20 @@ MongoDB Atlas is not compatible with this project: its data layer uses PostgreSQ
 6. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env.local` before the first app request. The first request seeds that admin and the starter website content into the hosted database.
 7. Run `npm run dev`.
 
+## Persistent Admin Media
+
+Admin uploads use a public Supabase Storage bucket named `site-media` by default configuration. Create that bucket in the same Supabase project and make it public for website reads. Restrict its allowed MIME types to JPEG, PNG, WebP, AVIF, GIF, MP4, and WebM, and set the bucket file-size limit to 50 MB. Uploads go directly from the browser to a short-lived signed URL; the service-role key stays on the server.
+
+Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_STORAGE_BUCKET` in `.env.local` and in Vercel. The anon key and URL are public configuration; the service-role key must remain server-side and must never use a `NEXT_PUBLIC_` prefix. Media URLs are saved in the existing `site_settings`, `products`, `categories`, `gallery`, and `team_members` fields. New unique object paths avoid CDN staleness when replacing media.
+
 ## Deploy With GitHub and Vercel
 
 1. Push this project to the GitHub repository.
 2. In [Vercel](https://vercel.com), choose **Add New Project** and import the repository.
-3. Add `DATABASE_URL`, `JWT_SECRET`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` under the Vercel project’s **Settings → Environment Variables**. Select Production, Preview, and Development as needed. Use the full Supabase Session Pooler URI, a unique random JWT secret (generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`), your admin email, and a strong unique admin password. Do not wrap values in quotes or commit them. Production requires `JWT_SECRET` and does not use a default signing key.
+3. Add the database, admin, JWT, and Supabase Storage variables listed above under **Settings → Environment Variables**. Select Production, Preview, and Development as needed. Use the full Supabase Session Pooler URI, a unique random JWT secret (generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`), your admin email, and a strong unique admin password. Do not wrap values in quotes or commit them. Production requires `JWT_SECRET` and does not use a default signing key.
 4. Ensure the Supabase schema is current by running `npx drizzle-kit push` locally with the production database URL in `.env.local`.
 5. Deploy or redeploy the Vercel project. The public site is `/`; the admin login is `/admin/login` on the assigned Vercel domain.
 
 ## Notes
 
-- Uploads currently write to `public/uploads`. Vercel’s filesystem is ephemeral, so configure persistent object storage before relying on admin image uploads in production.
 - Do not use the starter admin password on a public deployment.

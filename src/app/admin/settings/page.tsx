@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Settings, Save, Upload, CheckCircle2, AlertCircle } from "lucide-react";
+import { uploadAdminMedia } from "@/lib/media-upload";
+import { resolveMediaUrl } from "@/lib/media";
 
 export default function SiteSettingsAdminPage() {
   const [loading, setLoading] = useState(true);
@@ -43,7 +45,11 @@ export default function SiteSettingsAdminPage() {
       const res = await fetch("/api/admin/site-settings");
       const data = await res.json();
       if (res.ok && data.settings) {
-        setForm(data.settings);
+        setForm({
+          ...data.settings,
+          logoUrl: resolveMediaUrl(data.settings.logoUrl),
+          faviconUrl: resolveMediaUrl(data.settings.faviconUrl),
+        });
       }
     } catch (err) {
       console.error(err);
@@ -59,24 +65,14 @@ export default function SiteSettingsAdminPage() {
     setUploading(true);
     setError("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Upload failed");
-      } else {
-        setForm((prev) => ({ ...prev, [fieldName]: data.url }));
-        setMessage("File uploaded successfully");
-      }
-    } catch (err) {
-      setError("File upload failed");
+      const url = await uploadAdminMedia(file, "brand");
+      setForm((prev) => fieldName === "logoUrl"
+        ? { ...prev, logoUrl: url, faviconUrl: url }
+        : { ...prev, [fieldName]: url });
+      setMessage("Upload complete. Save changes to publish this media.");
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "File upload failed");
     } finally {
       setUploading(false);
     }
@@ -183,7 +179,7 @@ export default function SiteSettingsAdminPage() {
               <input
                 type="text"
                 value={form.logoUrl || ""}
-                onChange={(e) => setForm({ ...form, logoUrl: e.target.value })}
+                onChange={(e) => setForm({ ...form, logoUrl: e.target.value, faviconUrl: e.target.value })}
                 className="w-full px-4 py-2.5 rounded-xl bg-[#221F26] border border-white/10 text-xs text-white focus:outline-none focus:border-[#D4AF37] mb-2"
               />
               <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs text-gray-200 cursor-pointer font-semibold transition-colors">
@@ -191,7 +187,7 @@ export default function SiteSettingsAdminPage() {
                 <span>Upload New Logo File</span>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
                   onChange={(e) => handleFileUpload(e, "logoUrl")}
                   className="hidden"
                 />
@@ -201,7 +197,7 @@ export default function SiteSettingsAdminPage() {
             {form.logoUrl && (
               <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
                 <div className="relative w-16 h-16 rounded-full overflow-hidden border border-[#D4AF37] bg-[#6B1D2F]">
-                  <Image src={form.logoUrl} alt="Current Logo" fill className="object-cover" />
+                  <Image src={resolveMediaUrl(form.logoUrl, "/images/brand-seal.png")} alt="Current Logo" fill className="object-cover" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-white block">Current Logo Preview</span>

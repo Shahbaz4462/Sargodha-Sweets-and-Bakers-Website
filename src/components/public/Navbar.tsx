@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import { Sun, Moon, Menu, X, Phone, ShoppingBag } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface NavbarProps {
   settings?: any;
@@ -16,7 +17,7 @@ export function Navbar({ settings }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const businessName = settings?.businessName || "Sargodha Sweets & Bakers";
-  const logoUrl = settings?.logoUrl || "/images/brand-seal.png";
+  const logoUrl = resolveMediaUrl(settings?.logoUrl, "/images/brand-seal.png");
   const phone = settings?.phone || "+92 300 1234567";
 
   useEffect(() => {

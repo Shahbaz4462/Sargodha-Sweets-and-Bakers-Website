@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { Camera, X, Maximize2 } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface GalleryItem {
   id: number;
@@ -80,7 +81,7 @@ export function GallerySection({ gallery }: GallerySectionProps) {
               className="group relative h-64 sm:h-72 rounded-2xl overflow-hidden shadow-md border border-black/10 dark:border-white/10 cursor-pointer bg-black/5 dark:bg-white/5"
             >
               <Image
-                src={item.image}
+                src={resolveMediaUrl(item.image, "/images/hero-fallback.jpg")}
                 alt={item.title || "Bakery Gallery"}
                 fill
                 className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -126,7 +127,7 @@ export function GallerySection({ gallery }: GallerySectionProps) {
           >
             <div className="relative w-full h-[350px] sm:h-[500px]">
               <Image
-                src={lightboxItem.image}
+                src={resolveMediaUrl(lightboxItem.image, "/images/hero-fallback.jpg")}
                 alt={lightboxItem.title}
                 fill
                 className="object-contain bg-black"

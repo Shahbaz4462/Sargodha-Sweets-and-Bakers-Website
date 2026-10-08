@@ -57,7 +57,7 @@ async function seedDatabaseOnce() {
         heroTitle: "A Tradition of Taste, Quality & Sweetness",
         heroSubtitle: "Since 1990",
         heroDescription: "Discover the authentic Pakistani sweets, artisanal cakes, and bakery creations that have been part of our family journey for generations.",
-        heroVideoUrl: "https://videos.pexels.com/video-files/8478025/8478025-hd_1920_1080_24fps.mp4",
+        heroVideoUrl: "",
         heroFallbackImage: "/images/cat-sweets.jpg",
         heroVideoEnabled: false,
         introHeading: "A Legacy of Taste Since 1990",
