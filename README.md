@@ -24,7 +24,7 @@ In local development without production environment variables, the starter admin
 MongoDB Atlas is not compatible with this project: its data layer uses PostgreSQL and Drizzle ORM. Supabase PostgreSQL is a suitable hosted database.
 
 1. Create a project at [supabase.com/dashboard](https://supabase.com/dashboard).
-2. In the project dashboard, select **Connect** and copy a PostgreSQL connection URI. For Vercel, use the **Session pooler** URI if the direct database host is not reachable from your network/runtime.
+2. In the project dashboard, select **Connect** and copy a PostgreSQL connection URI. This project uses the Supabase Session Pooler at `aws-0-ap-northeast-1.pooler.supabase.com:5432`.
 3. Copy `.env.example` to `.env.local`, then set `DATABASE_URL` to the copied URI. Replace the password placeholder; URL-encode special characters in the password. Keep `.env.local` private and out of Git.
 4. Create/update the hosted database tables from the project root:
 
