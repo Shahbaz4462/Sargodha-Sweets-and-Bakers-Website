@@ -23,8 +23,9 @@ if (databaseUrl && !globalForDb.__sargodhaPostgresPool) {
   const postgresPool = new Pool({
     connectionString: databaseUrl,
     max: 1,
-    idleTimeoutMillis: 10_000,
-    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 1_000,
+    connectionTimeoutMillis: 30_000,
+    allowExitOnIdle: true,
   });
   postgresPool.on("error", (error) => {
     console.error("Unexpected idle PostgreSQL client error", error);
