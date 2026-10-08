@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #FAF7F2;
+    --bg-secondary: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --bg-glass: rgba(250, 247, 242, 0.85);
+    --text-primary: #221F1F;
+    --text-secondary: #5A5252;
+    --text-muted: #8C8282;
+    --border-color: #E8E1D9;
+    --brand-burgundy: #6B1D2F;
+    --brand-burgundy-hover: #541625;
+    --brand-gold: #D4AF37;
+    --brand-gold-hover: #B89428;
+    --brand-accent: #8C6D58;
+  }
+
+  .dark {
+    --bg-primary: #121013;
+    --bg-secondary: #1A171C;
+    --bg-card: #201D24;
+    --bg-glass: rgba(18, 16, 19, 0.85);
+    --text-primary: #F5F2EC;
+    --text-secondary: #C8C2B8;
+    --text-muted: #8E877E;
+    --border-color: #332E38;
+    --brand-burgundy: #8B233D;
+    --brand-burgundy-hover: #A32C4A;
+    --brand-gold: #E5C158;
+    --brand-gold-hover: #F2D272;
+    --brand-accent: #A88670;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Utilities */
+.bg-cream { background-color: var(--bg-primary); }
+.bg-card-custom { background-color: var(--bg-card); }
+.text-custom-primary { color: var(--text-primary); }
+.text-custom-secondary { color: var(--text-secondary); }
+.text-custom-muted { color: var(--text-muted); }
+.border-custom { border-color: var(--border-color); }
+
+.bg-burgundy { background-color: var(--brand-burgundy); }
+.text-burgundy { color: var(--brand-burgundy); }
+.border-burgundy { border-color: var(--brand-burgundy); }
+
+.bg-gold { background-color: var(--brand-gold); }
+.text-gold { color: var(--brand-gold); }
+.border-gold { border-color: var(--brand-gold); }
+
+.glass-nav {
+  background-color: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--brand-burgundy);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-gold);
+}
