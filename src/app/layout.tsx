@@ -22,12 +22,12 @@ export const metadata: Metadata = {
     title: "Sargodha Sweets & Bakers | Since 1990",
     description:
       "A Tradition of Taste, Quality & Sweetness. Discover handcrafted Pakistani sweets, custom cakes, and fresh bakery creations.",
-    images: [{ url: "/images/hero-fallback.jpg" }],
+    images: [{ url: "/images/cat-sweets.jpg" }],
   },
   icons: {
-    icon: "/images/logo.png",
-    shortcut: "/images/logo.png",
-    apple: "/images/logo.png",
+    icon: "/images/brand-seal.png",
+    shortcut: "/images/brand-seal.png",
+    apple: "/images/brand-seal.png",
   },
 };
 

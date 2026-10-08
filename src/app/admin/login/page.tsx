@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
           <div className="text-center mb-8">
             <div className="relative w-20 h-20 mx-auto mb-4 rounded-full border-2 border-[#D4AF37] bg-[#6B1D2F] p-1 shadow-lg">
               <Image
-                src="/images/logo.png"
+                src="/images/brand-seal.png"
                 alt="Sargodha Sweets Admin"
                 fill
                 className="object-cover rounded-full"

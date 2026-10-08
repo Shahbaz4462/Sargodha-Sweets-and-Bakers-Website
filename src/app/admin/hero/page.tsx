@@ -16,7 +16,7 @@ export default function HeroAdminPage() {
     heroTitle: "A Tradition of Taste, Quality & Sweetness",
     heroDescription: "Discover the authentic Pakistani sweets, artisanal cakes, and bakery creations that have been part of our family journey for generations.",
     heroVideoUrl: "https://videos.pexels.com/video-files/8478025/8478025-hd_1920_1080_24fps.mp4",
-    heroFallbackImage: "/images/hero-fallback.jpg",
+    heroFallbackImage: "/images/cat-sweets.jpg",
     heroVideoEnabled: true,
   });
 
@@ -217,7 +217,7 @@ export default function HeroAdminPage() {
                 </video>
               ) : (
                 <Image
-                  src={form.heroFallbackImage || "/images/hero-fallback.jpg"}
+                  src={form.heroFallbackImage || "/images/cat-sweets.jpg"}
                   alt="Hero Preview"
                   fill
                   className="object-cover"

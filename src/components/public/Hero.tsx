@@ -17,8 +17,8 @@ export function Hero({ settings }: HeroProps) {
     settings?.heroDescription ||
     "Discover the authentic Pakistani sweets, artisanal cakes, and bakery creations that have been part of our family journey for generations.";
   const videoUrl = settings?.heroVideoUrl || "https://videos.pexels.com/video-files/8478025/8478025-hd_1920_1080_24fps.mp4";
-  const fallbackImage = settings?.heroFallbackImage || "/images/hero-fallback.jpg";
-  const videoEnabled = settings?.heroVideoEnabled ?? true;
+  const fallbackImage = settings?.heroFallbackImage || "/images/cat-sweets.jpg";
+  const videoEnabled = settings?.heroVideoEnabled ?? false;
 
   return (
     <section id="hero" className="relative w-full min-h-[92vh] flex items-center justify-center overflow-hidden pt-20">

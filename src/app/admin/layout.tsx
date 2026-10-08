@@ -94,7 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Header Branding */}
           <div className="p-6 border-b border-white/10 flex items-center gap-3">
             <div className="relative w-10 h-10 rounded-full border border-[#D4AF37] overflow-hidden bg-[#6B1D2F]">
-              <Image src="/images/logo.png" alt="Sargodha Sweets Logo" fill className="object-cover" />
+              <Image src="/images/brand-seal.png" alt="Sargodha Sweets Logo" fill className="object-cover" />
             </div>
             <div>
               <span className="font-serif text-sm font-bold block text-white">Sargodha Sweets</span>
@@ -158,7 +158,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="md:hidden bg-[#18151B] border-b border-white/10 p-4 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <div className="relative w-8 h-8 rounded-full border border-[#D4AF37] overflow-hidden bg-[#6B1D2F]">
-            <Image src="/images/logo.png" alt="Logo" fill className="object-cover" />
+            <Image src="/images/brand-seal.png" alt="Logo" fill className="object-cover" />
           </div>
           <span className="font-serif text-sm font-bold">Admin Dashboard</span>
         </div>

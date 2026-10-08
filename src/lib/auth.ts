@@ -4,9 +4,13 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-const SECRET_KEY = new TextEncoder().encode(
-  process.env.JWT_SECRET || "sargodha_sweets_bakers_super_secret_jwt_key_1990_production"
-);
+const jwtSecret = process.env.JWT_SECRET || (process.env.NODE_ENV === "production" ? "" : "local-development-only-secret");
+
+if (!jwtSecret) {
+  throw new Error("JWT_SECRET is required in production");
+}
+
+const SECRET_KEY = new TextEncoder().encode(jwtSecret);
 
 export interface AdminPayload {
   id: number;

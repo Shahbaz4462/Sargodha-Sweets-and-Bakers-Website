@@ -16,7 +16,7 @@ export function Navbar({ settings }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const businessName = settings?.businessName || "Sargodha Sweets & Bakers";
-  const logoUrl = settings?.logoUrl || "/images/logo.png";
+  const logoUrl = settings?.logoUrl || "/images/brand-seal.png";
   const phone = settings?.phone || "+92 300 1234567";
 
   useEffect(() => {

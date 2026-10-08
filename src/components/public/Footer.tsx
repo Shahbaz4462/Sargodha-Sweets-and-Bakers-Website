@@ -11,7 +11,7 @@ interface FooterProps {
 
 export function Footer({ settings, categories = [] }: FooterProps) {
   const businessName = settings?.businessName || "Sargodha Sweets & Bakers";
-  const logoUrl = settings?.logoUrl || "/images/logo.png";
+  const logoUrl = settings?.logoUrl || "/images/brand-seal.png";
   const tagline = settings?.tagline || "Since 1990 — A Tradition of Taste, Quality & Sweetness";
   const address = settings?.address || "Main Bazaar, Near Clock Tower, Sargodha, Punjab, Pakistan";
   const phone = settings?.phone || "+92 300 1234567";

@@ -45,7 +45,7 @@ MongoDB Atlas is not compatible with this project: its data layer uses PostgreSQ
 
 1. Push this project to the GitHub repository.
 2. In [Vercel](https://vercel.com), choose **Add New Project** and import the repository.
-3. Add `DATABASE_URL`, `JWT_SECRET`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` under the Vercel project’s **Settings → Environment Variables**. Add them for Production and Preview as needed. Use the Supabase URI, a unique random JWT secret, and a strong admin password; never commit these values.
+3. Add `DATABASE_URL`, `JWT_SECRET`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` under the Vercel project’s **Settings → Environment Variables**. Select Production, Preview, and Development as needed. Use the full Supabase Session Pooler URI, a unique random JWT secret (generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`), your admin email, and a strong unique admin password. Do not wrap values in quotes or commit them. Production requires `JWT_SECRET` and does not use a default signing key.
 4. Ensure the Supabase schema is current by running `npx drizzle-kit push` locally with the production database URL in `.env.local`.
 5. Deploy or redeploy the Vercel project. The public site is `/`; the admin login is `/admin/login` on the assigned Vercel domain.
 
