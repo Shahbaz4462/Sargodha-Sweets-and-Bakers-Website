@@ -15,21 +15,36 @@ const globalForDb = globalThis as typeof globalThis & {
   __sargodhaLocalDbReady?: Promise<void>;
 };
 
-if (databaseUrl && !globalForDb.__sargodhaPostgresPool) {
-  const configuredMax = Number.parseInt(process.env.POSTGRES_POOL_MAX || "10", 10);
-  const poolMax = Number.isFinite(configuredMax) && configuredMax > 0 ? Math.min(configuredMax, 20) : 10;
+function createPostgresPool(connectionString: string): Pool {
+  const isServerless = Boolean(process.env.VERCEL);
+  const configuredMax = Number.parseInt(process.env.POSTGRES_POOL_MAX || "", 10);
+  const defaultMax = isServerless ? 1 : 2;
+  const poolMax =
+    Number.isFinite(configuredMax) && configuredMax > 0
+      ? Math.min(configuredMax, isServerless ? 1 : 5)
+      : defaultMax;
 
   const postgresPool = new Pool({
-    connectionString: databaseUrl,
+    connectionString,
     max: poolMax,
-    idleTimeoutMillis: 30_000,
-    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: isServerless ? 10_000 : 30_000,
+    connectionTimeoutMillis: 8_000,
     allowExitOnIdle: true,
   });
+
   postgresPool.on("error", (error) => {
-    console.error("Unexpected idle PostgreSQL client error", error);
+    console.error("PostgreSQL pool error: unexpected idle client failure");
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
   });
-  globalForDb.__sargodhaPostgresPool = postgresPool;
+
+  console.info(`PostgreSQL pool initialized with max ${poolMax} client(s)`);
+  return postgresPool;
+}
+
+if (databaseUrl && !globalForDb.__sargodhaPostgresPool) {
+  globalForDb.__sargodhaPostgresPool = createPostgresPool(databaseUrl);
 }
 
 export const pool = databaseUrl ? globalForDb.__sargodhaPostgresPool : undefined;

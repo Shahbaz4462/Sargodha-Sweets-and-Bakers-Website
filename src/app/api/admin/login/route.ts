@@ -2,14 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { createAdminToken, logAdminAction } from "@/lib/auth";
-import { seedDatabase } from "@/db/seed";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
   try {
-    await seedDatabase();
-
     const body = await req.json();
     const { email, password } = body;
 
@@ -59,7 +56,10 @@ export async function POST(req: Request) {
 
     return response;
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Admin login failed due to a server or database error");
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

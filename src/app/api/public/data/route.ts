@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { siteSettings, categories, products, teamMembers, timelines, gallery } from "@/db/schema";
-import { seedDatabase } from "@/db/seed";
-import { eq, asc } from "drizzle-orm";
+import { asc } from "drizzle-orm";
 import { resolveMediaUrl } from "@/lib/media";
 
 export const dynamic = "force-dynamic";
@@ -10,9 +9,6 @@ export const revalidate = 0;
 
 export async function GET() {
   try {
-    // Seed database if necessary
-    await seedDatabase();
-
     const [settingsList] = await Promise.all([
       db.select().from(siteSettings).limit(1),
     ]);
@@ -59,7 +55,10 @@ export async function GET() {
       gallery: activeGallery,
     }, { headers: { "Cache-Control": "no-store, max-age=0" } });
   } catch (error) {
-    console.error("Public data error:", error);
+    console.error("Public data query failed");
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
     return NextResponse.json({ error: "Failed to fetch public data" }, { status: 500 });
   }
 }

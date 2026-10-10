@@ -1,8 +1,8 @@
+import "server-only";
+
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { db } from "@/db";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 const getJwtSecretKey = () => new TextEncoder().encode(process.env.JWT_SECRET || "local-development-only-secret");
 

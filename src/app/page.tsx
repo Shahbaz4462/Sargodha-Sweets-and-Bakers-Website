@@ -1,7 +1,6 @@
 import React from "react";
-import { db } from "@/db";
+import { db, initializeDatabase } from "@/db";
 import { siteSettings, categories, products, teamMembers, timelines, gallery } from "@/db/schema";
-import { seedDatabase } from "@/db/seed";
 import { asc } from "drizzle-orm";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/public/Navbar";
@@ -18,17 +17,35 @@ import { Footer } from "@/components/public/Footer";
 export const revalidate = 0; // Fresh content on demand
 
 export default async function HomePage() {
-  // Ensure DB seed runs on startup
-  await seedDatabase();
+  await initializeDatabase();
+  if (!process.env.DATABASE_URL) {
+    const { seedDatabase } = await import("@/db/seed");
+    await seedDatabase();
+  }
 
-  const [settingsList, categoriesList, productsList, teamList, timelineList, galleryList] = await Promise.all([
-    db.select().from(siteSettings).limit(1),
-    db.select().from(categories).orderBy(asc(categories.sortOrder), asc(categories.id)),
-    db.select().from(products).orderBy(asc(products.sortOrder), asc(products.id)),
-    db.select().from(teamMembers).orderBy(asc(teamMembers.sortOrder), asc(teamMembers.id)),
-    db.select().from(timelines).orderBy(asc(timelines.sortOrder), asc(timelines.id)),
-    db.select().from(gallery).orderBy(asc(gallery.sortOrder), asc(gallery.id)),
-  ]);
+  let settingsList;
+  let categoriesList;
+  let productsList;
+  let teamList;
+  let timelineList;
+  let galleryList;
+
+  try {
+    [settingsList, categoriesList, productsList, teamList, timelineList, galleryList] = await Promise.all([
+      db.select().from(siteSettings).limit(1),
+      db.select().from(categories).orderBy(asc(categories.sortOrder), asc(categories.id)),
+      db.select().from(products).orderBy(asc(products.sortOrder), asc(products.id)),
+      db.select().from(teamMembers).orderBy(asc(teamMembers.sortOrder), asc(teamMembers.id)),
+      db.select().from(timelines).orderBy(asc(timelines.sortOrder), asc(timelines.id)),
+      db.select().from(gallery).orderBy(asc(gallery.sortOrder), asc(gallery.id)),
+    ]);
+  } catch (error) {
+    console.error("Homepage content query failed");
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
+    throw error;
+  }
 
   const settings = settingsList[0] || null;
 

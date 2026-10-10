@@ -15,7 +15,11 @@ export async function GET() {
     return NextResponse.json(settings || {}, {
       headers: { "Cache-Control": "no-store, max-age=0" },
     });
-  } catch {
+  } catch (error) {
+    console.error("Public site settings query failed");
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
     return NextResponse.json({ error: "Could not load public branding settings." }, { status: 500 });
   }
 }
