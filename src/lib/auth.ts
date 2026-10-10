@@ -4,13 +4,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-const jwtSecret = process.env.JWT_SECRET || (process.env.NODE_ENV === "production" ? "" : "local-development-only-secret");
-
-if (!jwtSecret) {
-  throw new Error("JWT_SECRET is required in production");
-}
-
-const SECRET_KEY = new TextEncoder().encode(jwtSecret);
+const getJwtSecretKey = () => new TextEncoder().encode(process.env.JWT_SECRET || "local-development-only-secret");
 
 export interface AdminPayload {
   id: number;
@@ -24,12 +18,12 @@ export async function createAdminToken(payload: AdminPayload): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(SECRET_KEY);
+    .sign(getJwtSecretKey());
 }
 
 export async function verifyAdminToken(token: string): Promise<AdminPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, SECRET_KEY);
+    const { payload } = await jwtVerify(token, getJwtSecretKey());
     return payload as unknown as AdminPayload;
   } catch {
     return null;

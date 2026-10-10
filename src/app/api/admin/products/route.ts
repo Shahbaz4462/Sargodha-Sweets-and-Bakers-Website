@@ -54,7 +54,19 @@ export async function POST(req: Request) {
     } catch {
       return NextResponse.json({ error: "Additional product images must be a valid image list." }, { status: 400 });
     }
-    if (!isAllowedMediaUrl(image) || extraImageUrls.some((url) => !isAllowedMediaUrl(url))) {
+    let normalizedImage = image;
+    if (id) {
+      const existing = await db.select().from(products).where(eq(products.id, Number(id))).limit(1);
+      const currentImage = existing[0]?.image ?? "";
+
+      if (image === null || image === "__REMOVE__") {
+        normalizedImage = "";
+      } else if (typeof image === "string" && image.trim() === "") {
+        normalizedImage = currentImage;
+      }
+    }
+
+    if ((normalizedImage !== undefined && normalizedImage !== null && normalizedImage !== "" && !isAllowedMediaUrl(normalizedImage)) || extraImageUrls.some((url) => !isAllowedMediaUrl(url))) {
       return NextResponse.json({ error: "Product media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
     }
 
@@ -79,7 +91,7 @@ export async function POST(req: Request) {
       priceDisplay: finalPriceDisplay,
       priceOnRequest: Boolean(priceOnRequest),
       unit: unit || "Per kg",
-      image: image || "",
+      image: normalizedImage ?? "",
       additionalImages: typeof additionalImages === "string" ? additionalImages : JSON.stringify(additionalImages || []),
       ingredients: ingredients || "",
       featured: Boolean(featured),

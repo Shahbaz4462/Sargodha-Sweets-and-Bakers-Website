@@ -32,12 +32,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Team media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
     }
 
+    let normalizedImage = image;
+    if (id) {
+      const existing = await db.select().from(teamMembers).where(eq(teamMembers.id, Number(id))).limit(1);
+      const currentImage = existing[0]?.image ?? "";
+
+      if (image === null || image === "__REMOVE__") {
+        normalizedImage = "";
+      } else if (typeof image === "string" && image.trim() === "") {
+        normalizedImage = currentImage;
+      }
+
+      if (normalizedImage !== "" && !isAllowedMediaUrl(normalizedImage)) {
+        return NextResponse.json({ error: "Team media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
+      }
+    } else if (image !== undefined && image !== null && image !== "" && !isAllowedMediaUrl(image)) {
+      return NextResponse.json({ error: "Team media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
+    }
+
     const payload = {
       name,
       role,
       qualification: qualification || "",
       biography: biography || "",
-      image: image || "",
+      image: normalizedImage ?? "",
       status: status || "active",
       sortOrder: Number(sortOrder) || 0,
     };

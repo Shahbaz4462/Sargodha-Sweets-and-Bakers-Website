@@ -8,10 +8,6 @@ import * as schema from "./schema";
 
 const databaseUrl = process.env.DATABASE_URL;
 
-if (!databaseUrl && process.env.NODE_ENV === "production") {
-  throw new Error("DATABASE_URL is required in production");
-}
-
 const globalForDb = globalThis as typeof globalThis & {
   __sargodhaPostgresPool?: Pool;
   __sargodhaPostgresDb?: NodePgDatabase<typeof schema>;
@@ -20,11 +16,14 @@ const globalForDb = globalThis as typeof globalThis & {
 };
 
 if (databaseUrl && !globalForDb.__sargodhaPostgresPool) {
+  const configuredMax = Number.parseInt(process.env.POSTGRES_POOL_MAX || "10", 10);
+  const poolMax = Number.isFinite(configuredMax) && configuredMax > 0 ? Math.min(configuredMax, 20) : 10;
+
   const postgresPool = new Pool({
     connectionString: databaseUrl,
-    max: 1,
-    idleTimeoutMillis: 1_000,
-    connectionTimeoutMillis: 30_000,
+    max: poolMax,
+    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 10_000,
     allowExitOnIdle: true,
   });
   postgresPool.on("error", (error) => {

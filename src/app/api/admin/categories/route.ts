@@ -28,7 +28,22 @@ export async function POST(req: Request) {
     if (!name) {
       return NextResponse.json({ error: "Category name is required" }, { status: 400 });
     }
-    if (!isAllowedMediaUrl(image)) {
+
+    let normalizedImage = image;
+    if (id) {
+      const existing = await db.select().from(categories).where(eq(categories.id, Number(id))).limit(1);
+      const currentImage = existing[0]?.image ?? "";
+
+      if (image === null || image === "__REMOVE__") {
+        normalizedImage = "";
+      } else if (typeof image === "string" && image.trim() === "") {
+        normalizedImage = currentImage;
+      }
+
+      if (normalizedImage !== "" && !isAllowedMediaUrl(normalizedImage)) {
+        return NextResponse.json({ error: "Category media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
+      }
+    } else if (image !== undefined && image !== null && image !== "" && !isAllowedMediaUrl(image)) {
       return NextResponse.json({ error: "Category media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
     }
 
@@ -41,7 +56,7 @@ export async function POST(req: Request) {
           name,
           slug: categorySlug,
           description: description || "",
-          image: image || "",
+          image: normalizedImage ?? "",
           status: status || "active",
           sortOrder: Number(sortOrder) || 0,
           updatedAt: new Date(),

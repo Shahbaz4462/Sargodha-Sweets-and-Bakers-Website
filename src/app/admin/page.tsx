@@ -20,10 +20,6 @@ export default function AdminDashboardPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
   const fetchStats = async () => {
     try {
       const res = await fetch("/api/admin/stats");
@@ -37,6 +33,12 @@ export default function AdminDashboardPage() {
       setLoading(false);
     }
   };
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchStats();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (loading) {
     return (

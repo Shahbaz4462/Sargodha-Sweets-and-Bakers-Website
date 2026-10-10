@@ -36,10 +36,6 @@ export default function SiteSettingsAdminPage() {
     footerText: "",
   });
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
   const fetchSettings = async () => {
     try {
       const res = await fetch("/api/admin/site-settings");
@@ -57,6 +53,12 @@ export default function SiteSettingsAdminPage() {
       setLoading(false);
     }
   };
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
     const file = e.target.files?.[0];

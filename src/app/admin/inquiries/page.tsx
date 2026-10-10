@@ -7,10 +7,6 @@ export default function InquiriesAdminPage() {
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchInquiries();
-  }, []);
-
   const fetchInquiries = async () => {
     try {
       const res = await fetch("/api/admin/inquiries");
@@ -22,6 +18,12 @@ export default function InquiriesAdminPage() {
       setLoading(false);
     }
   };
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchInquiries();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleUpdateStatus = async (id: number, status: string) => {
     try {
@@ -119,7 +121,7 @@ export default function InquiriesAdminPage() {
                 </div>
 
                 <p className="text-xs text-gray-200 leading-relaxed bg-white/5 p-3.5 rounded-xl border border-white/5">
-                  "{inq.message}"
+                  &quot;{inq.message}&quot;
                 </p>
               </div>
 

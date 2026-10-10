@@ -27,10 +27,6 @@ export default function CategoriesAdminPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
   const fetchCategories = async () => {
     try {
       const res = await fetch("/api/admin/categories");
@@ -42,6 +38,12 @@ export default function CategoriesAdminPage() {
       setLoading(false);
     }
   };
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleOpenModal = (cat: any = null) => {
     setError("");

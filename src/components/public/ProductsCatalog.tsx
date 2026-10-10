@@ -48,11 +48,13 @@ export function ProductsCatalog({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Sync prop category change
+  /* eslint-disable react-hooks/set-state-in-effect */
   React.useEffect(() => {
     if (selectedCategorySlug) {
       setActiveCategory(selectedCategorySlug);
     }
   }, [selectedCategorySlug]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Category ID map
   const categoryMap = useMemo(() => {
@@ -163,7 +165,7 @@ export function ProductsCatalog({
             <AlertCircle className="w-12 h-12 text-gold mx-auto mb-3 opacity-80" />
             <h3 className="font-serif text-lg font-bold text-custom-primary">No products found</h3>
             <p className="text-xs text-custom-muted mt-1 mb-4">
-              We couldn't find any item matching "{searchQuery}" in this category.
+              We couldn&apos;t find any item matching &quot;{searchQuery}&quot; in this category.
             </p>
             <button
               onClick={() => {

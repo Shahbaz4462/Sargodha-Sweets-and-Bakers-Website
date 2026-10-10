@@ -91,6 +91,7 @@ export async function createMediaUpload(request: SignedUploadRequest) {
     bucket,
     path: data.path,
     token: data.token,
+    signedUrl: data.signedUrl,
     publicUrl: publicData.publicUrl,
   };
 }

@@ -25,7 +25,22 @@ export async function POST(req: Request) {
     if (!year || !title) {
       return NextResponse.json({ error: "Year and title are required" }, { status: 400 });
     }
-    if (!isAllowedMediaUrl(image)) {
+
+    let normalizedImage = image;
+    if (id) {
+      const existing = await db.select().from(timelines).where(eq(timelines.id, Number(id))).limit(1);
+      const currentImage = existing[0]?.image ?? "";
+
+      if (image === null || image === "__REMOVE__") {
+        normalizedImage = "";
+      } else if (typeof image === "string" && image.trim() === "") {
+        normalizedImage = currentImage;
+      }
+
+      if (normalizedImage !== "" && !isAllowedMediaUrl(normalizedImage)) {
+        return NextResponse.json({ error: "Timeline media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
+      }
+    } else if (image !== undefined && image !== null && image !== "" && !isAllowedMediaUrl(image)) {
       return NextResponse.json({ error: "Timeline media must be local or stored in this project's Supabase Storage bucket." }, { status: 400 });
     }
 
@@ -33,7 +48,7 @@ export async function POST(req: Request) {
       year,
       title,
       description: description || "",
-      image: image || "",
+      image: normalizedImage ?? "",
       sortOrder: Number(sortOrder) || 0,
     };
 

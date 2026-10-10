@@ -28,10 +28,6 @@ export default function TeamAdminPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchTeam();
-  }, []);
-
   const fetchTeam = async () => {
     try {
       const res = await fetch("/api/admin/team");
@@ -43,6 +39,12 @@ export default function TeamAdminPage() {
       setLoading(false);
     }
   };
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchTeam();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleOpenModal = (member: any = null) => {
     setError("");

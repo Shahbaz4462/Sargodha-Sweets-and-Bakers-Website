@@ -22,10 +22,6 @@ export default function HeroAdminPage() {
     heroVideoEnabled: false,
   });
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
   const fetchSettings = async () => {
     try {
       const res = await fetch("/api/admin/site-settings");
@@ -48,6 +44,12 @@ export default function HeroAdminPage() {
       setLoading(false);
     }
   };
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
     const file = e.target.files?.[0];
@@ -237,7 +239,7 @@ export default function HeroAdminPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-gray-300 block mb-1">Subtitle Badge (e.g. "Since 1990")</label>
+              <label className="text-xs font-bold text-gray-300 block mb-1">Subtitle Badge (e.g. &quot;Since 1990&quot;)</label>
               <input
                 type="text"
                 required

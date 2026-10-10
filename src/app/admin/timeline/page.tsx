@@ -21,10 +21,6 @@ export default function TimelineAdminPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchTimeline();
-  }, []);
-
   const fetchTimeline = async () => {
     try {
       const res = await fetch("/api/admin/timeline");
@@ -36,6 +32,12 @@ export default function TimelineAdminPage() {
       setLoading(false);
     }
   };
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchTimeline();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleOpenModal = (item: any = null) => {
     setError("");

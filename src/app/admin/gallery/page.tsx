@@ -27,10 +27,6 @@ export default function GalleryAdminPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchGallery();
-  }, []);
-
   const fetchGallery = async () => {
     try {
       const res = await fetch("/api/admin/gallery");
@@ -42,6 +38,12 @@ export default function GalleryAdminPage() {
       setLoading(false);
     }
   };
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchGallery();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleOpenModal = (item: any = null) => {
     setError("");

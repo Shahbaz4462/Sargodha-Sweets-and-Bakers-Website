@@ -52,10 +52,6 @@ export default function ProductsAdminPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     try {
       const [pRes, cRes] = await Promise.all([
@@ -70,10 +66,16 @@ export default function ProductsAdminPage() {
       if (cRes.ok) setCategories(cData.categories || []);
     } catch (err) {
       console.error(err);
-    } fontLoading: {
+    } finally {
       setLoading(false);
     }
   };
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    fetchData();
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleOpenModal = (prod: any = null) => {
     setError("");
@@ -277,7 +279,7 @@ export default function ProductsAdminPage() {
               {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-gray-500">
-                    No products found. Click "Add New Product" to create one.
+                    No products found. Click &quot;Add New Product&quot; to create one.
                   </td>
                 </tr>
               ) : (

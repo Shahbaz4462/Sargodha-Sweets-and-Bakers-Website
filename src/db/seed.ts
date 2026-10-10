@@ -6,7 +6,13 @@ import { eq } from "drizzle-orm";
 export async function seedDatabase() {
   const globalForSeed = globalThis as typeof globalThis & {
     __sargodhaSeedPromise?: Promise<void>;
+    __sargodhaSeedDone?: boolean;
   };
+
+  if (globalForSeed.__sargodhaSeedDone) {
+    return;
+  }
+
   const seedPromise = globalForSeed.__sargodhaSeedPromise ??= seedDatabaseOnce();
 
   try {
@@ -20,6 +26,10 @@ export async function seedDatabase() {
 }
 
 async function seedDatabaseOnce() {
+  const globalForSeed = globalThis as typeof globalThis & {
+    __sargodhaSeedDone?: boolean;
+  };
+
   await initializeDatabase();
 
   const adminEmail = process.env.ADMIN_EMAIL || (process.env.NODE_ENV === "production" ? "" : "admin@sargodhasweets.com");
@@ -501,6 +511,7 @@ async function seedDatabaseOnce() {
       console.log("Seeded gallery");
     }
 
+    globalForSeed.__sargodhaSeedDone = true;
   } catch (err) {
     console.error("Error seeding database:", err);
     throw err;

@@ -1,7 +1,5 @@
 "use client";
 
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-
 export type MediaFolder = "brand" | "hero" | "products" | "categories" | "gallery" | "team";
 
 const mediaTypes: Record<string, (header: Uint8Array) => boolean> = {
@@ -13,27 +11,6 @@ const mediaTypes: Record<string, (header: Uint8Array) => boolean> = {
   "video/mp4": (header) => String.fromCharCode(...header.slice(4, 8)) === "ftyp",
   "video/webm": (header) => [0x1a, 0x45, 0xdf, 0xa3].every((byte, index) => header[index] === byte),
 };
-
-let storageClient: SupabaseClient | undefined;
-
-function getBrowserStorageClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !anonKey) {
-    throw new Error("Media uploads are not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.");
-  }
-
-  storageClient ??= createClient(url, anonKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false,
-    },
-  });
-
-  return storageClient;
-}
 
 export async function uploadAdminMedia(file: File, folder: MediaFolder): Promise<string> {
   const validateSignature = mediaTypes[file.type];
@@ -64,16 +41,17 @@ export async function uploadAdminMedia(file: File, folder: MediaFolder): Promise
     throw new Error(signedUpload.error || "Could not prepare the media upload.");
   }
 
-  const { error } = await getBrowserStorageClient()
-    .storage
-    .from(signedUpload.bucket)
-    .uploadToSignedUrl(signedUpload.path, signedUpload.token, file, {
-      contentType: file.type,
-      cacheControl: "31536000",
-    });
+  const uploadResponse = await fetch(signedUpload.signedUrl, {
+    method: "PUT",
+    body: file,
+    headers: {
+      "Content-Type": file.type,
+      "Cache-Control": "31536000",
+    },
+  });
 
-  if (error) {
-    throw new Error(error.message || "Could not upload media to persistent storage.");
+  if (!uploadResponse.ok) {
+    throw new Error("Upload failed. Please try again with a valid file.");
   }
 
   return signedUpload.publicUrl as string;
